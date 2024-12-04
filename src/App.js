@@ -1,25 +1,32 @@
-import logo from './logo.svg';
-import './App.css';
+// src/App.js
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
-function App() {
+// Import pages
+import Dashboard from './pages/Dashboard/DashboardPage';
+import Promotions from './pages/Promotions/PromotionsPage';
+import Complaints from './pages/Complaints/ComplaintsPage';
+import Requests from './pages/Requests/RequestsPage';
+import Notifications from './pages/Notifications/NotificationsPage';
+import Customers from './pages/Customers/CustomersPage'
+
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+
+
+    <Router>
+      <Routes>
+        <Route path="/dashboard" element={<Dashboard/>} />
+        <Route path="/promotions" element={<Promotions/>} />
+        <Route path="/complaints" element={<Complaints/>} />
+        <Route path="/requests" element={<Requests/>} />
+        <Route path="/notifications" element={<Notifications/>} />
+        <Route path="/customers" element={<Customers/>} />
+      </Routes>
+    </Router>
   );
-}
+};
 
 export default App;

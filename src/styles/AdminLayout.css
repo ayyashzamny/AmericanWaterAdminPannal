@@ -1,0 +1,42 @@
+/* src/styles/AdminLayout.css */
+.admin-layout {
+    display: flex;
+  }
+  
+  .admin-layout .main-content {
+    flex-grow: 1;
+    margin-left: 250px; /* Assuming Sidebar has a width of 250px */
+  }
+  
+  .admin-layout .content-body {
+    padding: 20px;
+  }
+  
+  .admin-sidebar {
+    width: 250px;
+    background-color: #333;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    color: white;
+    padding: 20px;
+  }
+  
+  .admin-topbar {
+    background-color: #333;
+    color: white;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .admin-topbar .logo {
+    font-size: 24px;
+  }
+  
+  .admin-topbar .user-info {
+    display: flex;
+    align-items: center;
+  }
+  

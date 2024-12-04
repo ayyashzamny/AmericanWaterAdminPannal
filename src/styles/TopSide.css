@@ -1,0 +1,49 @@
+/* src/styles/TopSide.css */
+
+/* Topbar Styling */
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #343a40; /* Dark background */
+    color: #fff;
+    padding: 10px 20px;
+    font-family: 'Arial', sans-serif;
+  }
+  
+  .topbar .logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: #f8f9fa; /* Light color for logo */
+  }
+  
+  .topbar .user-info {
+    display: flex;
+    align-items: center;
+  }
+  
+  .topbar .user-info span {
+    margin-right: 10px;
+    font-size: 16px;
+  }
+  
+  .topbar .logout-button {
+    background-color: #ff5c5c; /* Red button color for logout */
+    color: #fff;
+    padding: 5px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+  }
+  
+  .topbar .logout-button:hover {
+    background-color: #e03e3e; /* Darker red on hover */
+  }
+  
+  .topbar .logout-icon {
+    margin-right: 8px; /* Spacing between icon and text */
+    font-size: 18px;
+  }
+  
