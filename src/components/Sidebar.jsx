@@ -1,14 +1,16 @@
 // src/components/Sidebar.js
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaTachometerAlt, FaGift, FaComments, FaClipboardList, FaBell, FaUsers } from 'react-icons/fa'; // Import icons
-import '../styles/Sidebar.css'; // New or updated styling file
+import { FaTachometerAlt, FaGift, FaComments, FaClipboardList, FaBell, FaUsers, FaUserShield } from 'react-icons/fa'; // Import new icon for Users
+import '../styles/Sidebar.css'; // Styling file
+import logo from '../Assets/Images/AmericanLogo.png'; // Replace with the path to your logo file
 
 const Sidebar = () => {
   return (
     <div className="sidebar">
       <div className="sidebar-logo">
-        <h2>Admin Panel</h2> {/* You can replace this with your logo */}
+        {/* Logo Section */}
+        <img src={logo} alt="Logo" className="logo-image" />
       </div>
       <ul className="sidebar-menu">
         <li>
@@ -39,6 +41,11 @@ const Sidebar = () => {
         <li>
           <Link to="/customers" className="sidebar-link">
             <FaUsers className="sidebar-icon" /> Customers
+          </Link>
+        </li>
+        <li>
+          <Link to="/regsiter" className="sidebar-link"> {/* Add Users section */}
+            <FaUserShield className="sidebar-icon" /> Users
           </Link>
         </li>
       </ul>

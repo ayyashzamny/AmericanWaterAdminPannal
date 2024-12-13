@@ -1,111 +1,174 @@
-import React, { useState } from 'react';
-import { Button, Table } from 'react-bootstrap';
-import Swal from 'sweetalert2';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import PromotionModal from './PromotionModal';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Table, Button } from "react-bootstrap";
+import Swal from "sweetalert2";
+import PromotionModal from "./PromotionModal";
 
 const Promotions = () => {
-  const [showModal, setShowModal] = useState(false);
+  const [promotions, setPromotions] = useState([]);
+  const [show, setShow] = useState(false);
   const [editingPromotion, setEditingPromotion] = useState(false);
   const [currentPromotion, setCurrentPromotion] = useState(null);
-  const [promotions, setPromotions] = useState([
-    {
-      id: 1,
-      title: 'Holiday Sale',
-      description: 'Discounts on all items!',
-      startDate: '2024-12-01',
-      endDate: '2024-12-25',
-      image: 'holiday-sale.jpg',
-    },
-  ]);
   const [promotionData, setPromotionData] = useState({
-    title: '',
-    description: '',
-    startDate: '',
-    endDate: '',
-    image: '',
+    Title: "",
+    Description: "",
+    StartDate: "",
+    EndDate: "",
+    ImagePath: "", // This will hold a file reference for uploading
   });
 
+  // Modal Handlers
+  const handleShow = () => setShow(true);
   const handleClose = () => {
-    setShowModal(false);
+    setShow(false);
     setEditingPromotion(false);
-    setCurrentPromotion(null);
     setPromotionData({
-      title: '',
-      description: '',
-      startDate: '',
-      endDate: '',
-      image: '',
+      Title: "",
+      Description: "",
+      StartDate: "",
+      EndDate: "",
+      ImagePath: "",
     });
   };
 
-  const handleShow = () => setShowModal(true);
+  // Fetch promotions on component mount
+  useEffect(() => {
+    fetchPromotions();
+  }, []);
 
+  const fetchPromotions = async () => {
+    try {
+      const response = await axios.get("http://localhost:5050/api/promotions");
+      setPromotions(response.data);
+    } catch (error) {
+      console.error("Error fetching promotions:", error);
+    }
+  };
+
+  // Format date to a readable string (e.g., "MM/DD/YYYY")
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
+  };
+
+  // Handle input change in the form
   const handleChange = (e) => {
     const { name, value } = e.target;
     setPromotionData({ ...promotionData, [name]: value });
   };
 
-  const handleSave = () => {
-    if (editingPromotion && currentPromotion) {
-      const updatedPromotions = promotions.map((promotion) =>
-        promotion.id === currentPromotion.id
-          ? { ...promotion, ...promotionData }
-          : promotion
-      );
-      setPromotions(updatedPromotions);
-    } else {
-      const newId = promotions.length + 1;
-      setPromotions([...promotions, { id: newId, ...promotionData }]);
-    }
-
-    Swal.fire({
-      icon: 'success',
-      title: editingPromotion ? 'Promotion Updated!' : 'Promotion Added!',
-      showConfirmButton: false,
-      timer: 1500,
-    });
-
-    handleClose();
+  // Handle file input change
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    setPromotionData({ ...promotionData, [name]: files[0] });
   };
 
+  // Edit promotion
   const handleEditPromotion = (id) => {
     const promotion = promotions.find((p) => p.id === id);
-    setCurrentPromotion(promotion);
-    setPromotionData(promotion);
-    setEditingPromotion(true);
-    handleShow();
+    if (promotion) {
+      setCurrentPromotion(promotion);  // Store the selected promotion in the state
+      setPromotionData({
+        Title: promotion.Title,
+        Description: promotion.Description,
+        StartDate: promotion.StartDate,
+        EndDate: promotion.EndDate,
+        ImagePath: promotion.ImagePath,  // Keep the existing image path for editing
+      });
+      setEditingPromotion(true);  // Set the editing state to true
+      handleShow();  // Show the modal
+    }
   };
 
-  const handleDeletePromotion = (id) => {
-    Swal.fire({
-      title: 'Are you sure?',
-      text: 'This action cannot be undone!',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Yes, delete it!',
-      cancelButtonText: 'Cancel',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        setPromotions(promotions.filter((promotion) => promotion.id !== id));
+  // Save promotion (Create or Update)
+  const handleSave = async () => {
+    const formData = new FormData();
+    formData.append("Title", promotionData.Title);
+    formData.append("Description", promotionData.Description);
+    formData.append("StartDate", new Date(promotionData.StartDate).toISOString().split('T')[0]); // Ensure proper date format
+    formData.append("EndDate", new Date(promotionData.EndDate).toISOString().split('T')[0]); // Same for EndDate
+    if (promotionData.ImagePath) {
+      formData.append("ImagePath", promotionData.ImagePath); // Append the file if provided
+    }
+
+    try {
+      let response;
+      if (editingPromotion) {
+        // Update promotion if editing
+        response = await axios.put(`http://localhost:5050/api/promotions/${currentPromotion.id}`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
         Swal.fire({
-          icon: 'success',
-          title: 'Deleted!',
-          text: 'The promotion has been deleted.',
+          icon: "success",
+          title: "Promotion Updated!",
           showConfirmButton: false,
           timer: 1500,
         });
+      } else {
+        // Create new promotion
+        response = await axios.post("http://localhost:5050/api/promotions", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        Swal.fire({
+          icon: "success",
+          title: "Promotion Added!",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+      }
+      console.log("Promotion saved successfully", response.data);
+      handleClose();
+      fetchPromotions();
+    } catch (error) {
+      console.error("Error saving promotion:", error.response ? error.response.data : error);
+      Swal.fire({
+        icon: "error",
+        title: "Error!",
+        text: "There was an error saving the promotion.",
+      });
+    }
+  };
+
+  // Delete promotion
+  const handleDeletePromotion = async (id) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "This action cannot be undone!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await axios.delete(`http://localhost:5050/api/promotions/${id}`);
+          Swal.fire({
+            icon: "success",
+            title: "Promotion Deleted!",
+            showConfirmButton: false,
+            timer: 1500,
+          });
+          fetchPromotions();
+        } catch (error) {
+          console.error("Error deleting promotion:", error);
+        }
       }
     });
   };
 
   return (
     <div className="page">
-      <h1>Promotions</h1>
-      <Button variant="primary" className="mb-3" onClick={handleShow}>
-        Add New
+      <h2>Promotions Management</h2>
+      <Button variant="primary" onClick={handleShow} className="mb-3">
+        Add Promotion
       </Button>
 
+      {/* Promotions Table */}
       <Table striped bordered hover>
         <thead>
           <tr>
@@ -122,23 +185,27 @@ const Promotions = () => {
           {promotions.map((promotion, index) => (
             <tr key={promotion.id}>
               <td>{index + 1}</td>
-              <td>{promotion.title}</td>
-              <td>{promotion.description}</td>
-              <td>{promotion.startDate}</td>
-              <td>{promotion.endDate}</td>
-              <td>{promotion.image}</td>
+              <td>{promotion.Title || "N/A"}</td>
+              <td>{promotion.Description || "N/A"}</td>
+              <td>{formatDate(promotion.StartDate) || "N/A"}</td>
+              <td>{formatDate(promotion.EndDate) || "N/A"}</td>
               <td>
-                <Button
+                <img
+                  src={`${promotion.ImagePath}`}
+                  alt="Promotion"
+                  style={{ width: "200px", height: "auto", marginBottom: "10px" }}
+                />
+
+              </td>
+              <td>
+                {/* <Button
                   variant="warning"
                   className="me-2"
                   onClick={() => handleEditPromotion(promotion.id)}
                 >
                   Edit
-                </Button>
-                <Button
-                  variant="danger"
-                  onClick={() => handleDeletePromotion(promotion.id)}
-                >
+                </Button> */}
+                <Button variant="danger" onClick={() => handleDeletePromotion(promotion.Id)}>
                   Delete
                 </Button>
               </td>
@@ -147,12 +214,14 @@ const Promotions = () => {
         </tbody>
       </Table>
 
+      {/* Promotion Modal */}
       <PromotionModal
-        show={showModal}
+        show={show}
         handleClose={handleClose}
-        handleChange={handleChange}
-        handleSave={handleSave}
         promotionData={promotionData}
+        handleChange={handleChange}
+        handleFileChange={handleFileChange}
+        handleSave={handleSave}
         editingPromotion={editingPromotion}
       />
     </div>
