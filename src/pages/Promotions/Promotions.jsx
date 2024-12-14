@@ -38,7 +38,12 @@ const Promotions = () => {
 
   const fetchPromotions = async () => {
     try {
-      const response = await axios.get("http://localhost:5050/api/promotions");
+      const token = localStorage.getItem("authToken"); // Retrieve authToken from localStorage
+      const response = await axios.get("http://localhost:5050/api/promotions", {
+        headers: {
+          Authorization: `Bearer ${token}`, // Include the token in the headers
+        },
+      });
       setPromotions(response.data);
     } catch (error) {
       console.error("Error fetching promotions:", error);
@@ -92,14 +97,20 @@ const Promotions = () => {
     }
 
     try {
+      const token = localStorage.getItem("authToken"); // Retrieve authToken from localStorage
       let response;
       if (editingPromotion) {
         // Update promotion if editing
-        response = await axios.put(`http://localhost:5050/api/promotions/${currentPromotion.id}`, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
+        response = await axios.put(
+          `http://localhost:5050/api/promotions/${currentPromotion.id}`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${token}`, // Include the token in the headers
+            },
+          }
+        );
         Swal.fire({
           icon: "success",
           title: "Promotion Updated!",
@@ -108,11 +119,16 @@ const Promotions = () => {
         });
       } else {
         // Create new promotion
-        response = await axios.post("http://localhost:5050/api/promotions", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
+        response = await axios.post(
+          "http://localhost:5050/api/promotions",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${token}`, // Include the token in the headers
+            },
+          }
+        );
         Swal.fire({
           icon: "success",
           title: "Promotion Added!",
@@ -146,7 +162,12 @@ const Promotions = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`http://localhost:5050/api/promotions/${id}`);
+          const token = localStorage.getItem("authToken"); // Retrieve authToken from localStorage
+          await axios.delete(`http://localhost:5050/api/promotions/${id}`, {
+            headers: {
+              Authorization: `Bearer ${token}`, // Include the token in the headers
+            },
+          });
           Swal.fire({
             icon: "success",
             title: "Promotion Deleted!",
@@ -195,16 +216,8 @@ const Promotions = () => {
                   alt="Promotion"
                   style={{ width: "200px", height: "auto", marginBottom: "10px" }}
                 />
-
               </td>
               <td>
-                {/* <Button
-                  variant="warning"
-                  className="me-2"
-                  onClick={() => handleEditPromotion(promotion.id)}
-                >
-                  Edit
-                </Button> */}
                 <Button variant="danger" onClick={() => handleDeletePromotion(promotion.Id)}>
                   Delete
                 </Button>

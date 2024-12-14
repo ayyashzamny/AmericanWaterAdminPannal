@@ -17,11 +17,18 @@ const Complaints = () => {
   });
   const [selectedStatus, setSelectedStatus] = useState(""); // Added state for selected status
 
+  // Assuming token is stored in localStorage
+  const token = localStorage.getItem('authToken'); // Replace with your actual token storage logic
+
   // Fetch complaints data
   useEffect(() => {
     const fetchComplaints = async () => {
       try {
-        const response = await axios.get('http://localhost:5050/api/complaints'); // Replace with your API endpoint
+        const response = await axios.get('http://localhost:5050/api/complaints', {
+          headers: {
+            Authorization: `Bearer ${token}`, // Send token in the header
+          },
+        });
         const complaintsData = response.data;
         setComplaints(complaintsData); // Assuming API returns an array of complaints
         setFilteredRequests(complaintsData); // Set filteredRequests to all complaints initially
@@ -38,7 +45,7 @@ const Complaints = () => {
       }
     };
     fetchComplaints();
-  }, []);
+  }, [token]);
 
   // Update status counts
   const updateStatusCounts = (complaintsData) => {
@@ -74,6 +81,11 @@ const Complaints = () => {
         `http://localhost:5050/api/complaints/status/${complaintId}`,
         {
           Status: newStatus, // Send only the new status
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Send token in the header
+          },
         }
       );
 

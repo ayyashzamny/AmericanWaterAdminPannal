@@ -7,9 +7,10 @@ const notificationRoutes = require("./routes/notifications");
 const SendnotificationRoutes = require("./routes/sendNotifications");
 const requestRoutes = require("./routes/requests");
 const customerRoutes = require("./routes/customers");
-const authRouts = require("./routes/login");
-const registerRouts = require("./routes/register");
+const authRoutes = require("./routes/login");
+const registerRoutes = require("./routes/register");
 const cors = require("cors");
+const verifyToken = require("./middleware/authMiddleware"); // Import the token verification middleware
 
 dotenv.config(); // Load environment variables from a .env file
 
@@ -32,15 +33,17 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded request bo
     }
 })();
 
-// Routes
-app.use("/api/complaints", complaintsRoutes);
-app.use("/api/promotions", promotionRoutes);
-app.use("/api/notifications", notificationRoutes);
-app.use("/api/FirebasePushNotifications/sendToUser", SendnotificationRoutes);
-app.use("/api/requests", requestRoutes);
-app.use("/api/customers", customerRoutes);
-app.use("/api/auth", authRouts);
-app.use("/api/regauth", registerRouts);
+// Public Routes (No token required)
+app.use("/api/auth", authRoutes);
+app.use("/api/regauth", registerRoutes);
+
+// Protected Routes (Token required)
+app.use("/api/complaints", verifyToken, complaintsRoutes);
+app.use("/api/promotions", verifyToken, promotionRoutes);
+app.use("/api/notifications", verifyToken, notificationRoutes);
+app.use("/api/FirebasePushNotifications/sendToUser", verifyToken, SendnotificationRoutes);
+app.use("/api/requests", verifyToken, requestRoutes);
+app.use("/api/customers", verifyToken, customerRoutes);
 
 // Error handler middleware
 app.use((err, req, res, next) => {

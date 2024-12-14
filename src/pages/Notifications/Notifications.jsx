@@ -17,16 +17,26 @@ const Notifications = () => {
     title: '',
     description: '',
     url: '',
-    imageUrl: '', // Change this to image URL
+    imageUrl: '',
   });
   const [sendNotificationData, setSendNotificationData] = useState({
     customerId: '',
     notificationId: '',
   });
 
+  // Retrieve the token (Assuming it's in localStorage)
+  const token = localStorage.getItem('authToken');
+
+  // Axios instance with Authorization header
+  const axiosInstance = axios.create({
+    headers: {
+      'Authorization': `Bearer ${token}`, // Add the token to the Authorization header
+    },
+  });
+
   useEffect(() => {
     // Fetch notifications on component mount
-    axios.get('http://localhost:5050/api/notifications')
+    axiosInstance.get('http://localhost:5050/api/notifications')
       .then((response) => {
         setNotifications(response.data);
       })
@@ -45,7 +55,7 @@ const Notifications = () => {
       title: '',
       description: '',
       url: '',
-      imageUrl: '', // Reset the image URL
+      imageUrl: '',
     });
     setShowModal(false);
     setEditingNotification(false);
@@ -68,7 +78,7 @@ const Notifications = () => {
     // Add new notification or update existing one
     if (editingNotification && currentNotification) {
       // Update the notification
-      axios.put(`http://localhost:5050/api/notifications/${currentNotification.id}`, { title, description, url, imageUrl })
+      axiosInstance.put(`http://localhost:5050/api/notifications/${currentNotification.id}`, { title, description, url, imageUrl })
         .then((response) => {
           const updatedNotifications = notifications.map((notification) =>
             notification.id === currentNotification.id ? { ...notification, ...notificationData } : notification
@@ -92,7 +102,7 @@ const Notifications = () => {
         });
     } else {
       // Add new notification
-      axios.post('http://localhost:5050/api/notifications', { title, description, url, imageUrl })
+      axiosInstance.post('http://localhost:5050/api/notifications', { title, description, url, imageUrl })
         .then((response) => {
           setNotifications([...notifications, response.data]);
           Swal.fire({
@@ -132,7 +142,7 @@ const Notifications = () => {
       cancelButtonText: 'Cancel',
     }).then((result) => {
       if (result.isConfirmed) {
-        axios.delete(`http://localhost:5050/api/notifications/${id}`)
+        axiosInstance.delete(`http://localhost:5050/api/notifications/${id}`)
           .then((response) => {
             setNotifications(notifications.filter((notification) => notification.id !== id));
             Swal.fire({
@@ -167,7 +177,7 @@ const Notifications = () => {
       return;
     }
 
-    axios.post(`http://20.244.30.170/api/FirebasePushNotifications/sendToUser`, null, {
+    axiosInstance.post(`http://20.244.30.170/api/FirebasePushNotifications/sendToUser`, null, {
       params: {
         CustomerId: customerId,
         NotificationId: notificationId,
@@ -218,7 +228,6 @@ const Notifications = () => {
         Send Notification ALL
       </Button>
 
-
       <Table striped bordered hover className="mt-3">
         <thead>
           <tr>
@@ -267,7 +276,6 @@ const Notifications = () => {
           ))}
         </tbody>
       </Table>
-
 
       <NotificationModel
         show={showModal}

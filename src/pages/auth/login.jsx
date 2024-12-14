@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; 
-import "../../styles/Login.css"; // Importing the custom CSS file
+import { useNavigate } from "react-router-dom";
+import "../../styles/login.css"; // Importing the custom CSS file
 import logo from '../../Assets/Images/logo.png'; // Replace with the path to your logo file
 
 function Login() {
@@ -52,9 +52,9 @@ function Login() {
                     <img src={logo} alt="Logo" className="logo-image" />
                 </div>
                 <h2 className="login-title">Login</h2>
-                
+
                 {errorMessage && <p className="error-message">{errorMessage}</p>}
-                
+
                 <form onSubmit={handleLogin}>
                     <div className="form-group">
                         <label htmlFor="username">Username</label>

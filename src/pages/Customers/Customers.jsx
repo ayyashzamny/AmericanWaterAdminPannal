@@ -8,10 +8,17 @@ const Customers = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Add your token here or retrieve it from local storage or context
+  const token = localStorage.getItem('authToken'); // Replace with your actual token
+
   useEffect(() => {
     // Fetch data from API
     axios
-      .get('http://localhost:5050/api/customers')
+      .get('http://localhost:5050/api/customers', {
+        headers: {
+          Authorization: `Bearer ${token}`, // Add the token in the headers
+        },
+      })
       .then((response) => {
         setCustomers(response.data); // Assuming the data is in the response body
         setTotalCustomers(response.data.length); // Set total customers count
@@ -22,7 +29,7 @@ const Customers = () => {
         setError('Failed to fetch data');
         setLoading(false);
       });
-  }, []);
+  }, [token]); // Use token as dependency to re-fetch data if token changes
 
   if (loading) {
     return (

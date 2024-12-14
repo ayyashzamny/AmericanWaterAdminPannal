@@ -11,7 +11,7 @@ import Complaints from './pages/Complaints/ComplaintsPage';
 import Requests from './pages/Requests/RequestsPage';
 import Notifications from './pages/Notifications/NotificationsPage';
 import Customers from './pages/Customers/CustomersPage';
-import Login from './pages/auth/Login';
+import Login from './pages/auth/login';
 import Register from './pages/auth/registerPage';
 
 // Import PrivateRoute
@@ -28,10 +28,11 @@ const App = () => {
         <Route path="/requests" element={<PrivateRoute element={<Requests />} />} />
         <Route path="/notifications" element={<PrivateRoute element={<Notifications />} />} />
         <Route path="/customers" element={<PrivateRoute element={<Customers />} />} />
-        <Route path="/regsiter" element={<PrivateRoute  element={<Register />}/>} />
+        {/* <Route path="/regsiter" element={<PrivateRoute  element={<Register />}/>} /> */}
 
         {/* Public Routes */}
         <Route path="/" element={<Login />} />
+        <Route path="/register" element={<Register />} />
       </Routes>
     </Router>
   );

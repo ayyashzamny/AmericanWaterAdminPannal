@@ -12,15 +12,20 @@ const Requests = () => {
     const [selectedStatus, setSelectedStatus] = useState("");
 
     useEffect(() => {
-        // Fetch requests and count the statuses
         const fetchRequests = async () => {
+            const authToken = localStorage.getItem("authToken"); // Retrieve the token
+
             try {
-                const response = await axios.get("http://localhost:5050/api/requests");
+                const response = await axios.get("http://localhost:5050/api/requests", {
+                    headers: {
+                        Authorization: `Bearer ${authToken}`, // Set the Bearer token
+                    },
+                });
+
                 setRequests(response.data);
                 setFilteredRequests(response.data);
                 setLoading(false);
 
-                // Define the statuses we want to count
                 const statuses = [
                     "Recorded",
                     "Completed",
@@ -29,7 +34,7 @@ const Requests = () => {
                     "Forwarded To Operation",
                 ];
 
-                // Count the number of requests for each status
+                // Count the requests by their statuses
                 const counts = statuses.reduce((acc, status) => {
                     acc[status] = response.data.filter(
                         (request) => request.ReqStatusDesc === status
@@ -48,29 +53,27 @@ const Requests = () => {
         fetchRequests();
     }, []);
 
-    // Function to apply colors based on status
     const getStatusColor = (status) => {
         switch (status) {
             case "Recorded":
-                return "text-info font-weight-bold"; // Blue text, bold
+                return "text-info font-weight-bold";
             case "Completed":
-                return "text-success font-weight-bold"; // Green text, bold
+                return "text-success font-weight-bold";
             case "Rejected":
-                return "text-danger font-weight-bold"; // Red text, bold
+                return "text-danger font-weight-bold";
             case "Forwarded To Marketing":
-                return "text-warning font-weight-bold"; // Yellow text, bold
+                return "text-warning font-weight-bold";
             case "Forwarded To Operation":
-                return "text-primary font-weight-bold"; // Blue text, bold
+                return "text-primary font-weight-bold";
             default:
                 return "";
         }
     };
 
-    // Function to handle status filter
     const handleStatusFilter = (status) => {
         setSelectedStatus(status);
         if (status === "") {
-            setFilteredRequests(requests); // Show all requests if no status is selected
+            setFilteredRequests(requests);
         } else {
             setFilteredRequests(
                 requests.filter((request) => request.ReqStatusDesc === status)
@@ -78,28 +81,24 @@ const Requests = () => {
         }
     };
 
-    // Function to handle search input
     const handleSearch = (e) => {
         setSearchQuery(e.target.value);
-    
+
         const filtered = requests.filter((request) => {
             const lowerQuery = e.target.value.toLowerCase();
-    
-            // Convert CusID to string before calling toLowerCase
             const cusID = String(request.CusID).toLowerCase();
             const customerCode = String(request.CustomerCode).toLowerCase();
             const branchCode = String(request.BranchCode).toLowerCase();
-    
+
             return (
                 cusID.includes(lowerQuery) ||
                 customerCode.includes(lowerQuery) ||
                 branchCode.includes(lowerQuery)
             );
         });
-    
+
         setFilteredRequests(filtered);
     };
-    
 
     if (loading) return <div>Loading...</div>;
     if (error) return <div className="text-danger">{error}</div>;
@@ -111,76 +110,20 @@ const Requests = () => {
 
             {/* Status Counts Summary */}
             <Row className="mb-4">
-                <Col md={2}>
-                    <Card
-                        border="secondary"
-                        className="shadow-sm"
-                        onClick={() => handleStatusFilter("Recorded")}
-                    >
-                        <Card.Body className="text-center">
-                            <h6 className="card-title mb-1">Recorded</h6>
-                            <p className="card-text h5">
-                                {statusCounts["Recorded"] || 0}
-                            </p>
-                        </Card.Body>
-                    </Card>
-                </Col>
-                <Col md={2}>
-                    <Card
-                        border="secondary"
-                        className="shadow-sm"
-                        onClick={() => handleStatusFilter("Completed")}
-                    >
-                        <Card.Body className="text-center">
-                            <h6 className="card-title mb-1">Completed</h6>
-                            <p className="card-text h5">
-                                {statusCounts["Completed"] || 0}
-                            </p>
-                        </Card.Body>
-                    </Card>
-                </Col>
-                <Col md={2}>
-                    <Card
-                        border="secondary"
-                        className="shadow-sm"
-                        onClick={() => handleStatusFilter("Rejected")}
-                    >
-                        <Card.Body className="text-center">
-                            <h6 className="card-title mb-1">Rejected</h6>
-                            <p className="card-text h5">
-                                {statusCounts["Rejected"] || 0}
-                            </p>
-                        </Card.Body>
-                    </Card>
-                </Col>
-                <Col md={2}>
-                    <Card
-                        border="secondary"
-                        className="shadow-sm"
-                        onClick={() => handleStatusFilter("Forwarded To Marketing")}
-                    >
-                        <Card.Body className="text-center">
-                            <h6 className="card-title mb-1">Forwarded To Marketing</h6>
-                            <p className="card-text h5">
-                                {statusCounts["Forwarded To Marketing"] || 0}
-                            </p>
-                        </Card.Body>
-                    </Card>
-                </Col>
-                <Col md={2}>
-                    <Card
-                        border="secondary"
-                        className="shadow-sm"
-                        onClick={() => handleStatusFilter("Forwarded To Operation")}
-                    >
-                        <Card.Body className="text-center">
-                            <h6 className="card-title mb-1">Forwarded To Operation</h6>
-                            <p className="card-text h5">
-                                {statusCounts["Forwarded To Operation"] || 0}
-                            </p>
-                        </Card.Body>
-                    </Card>
-                </Col>
+                {["Recorded", "Completed", "Rejected", "Forwarded To Marketing", "Forwarded To Operation"].map((status) => (
+                    <Col md={2} key={status}>
+                        <Card
+                            border="secondary"
+                            className="shadow-sm"
+                            onClick={() => handleStatusFilter(status)}
+                        >
+                            <Card.Body className="text-center">
+                                <h6 className="card-title mb-1">{status}</h6>
+                                <p className="card-text h5">{statusCounts[status] || 0}</p>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                ))}
             </Row>
 
             {/* Search Bar */}
@@ -193,6 +136,7 @@ const Requests = () => {
                 />
             </Form.Group>
 
+            {/* Requests Table */}
             <div className="table-responsive">
                 <Table striped bordered hover className="shadow-sm">
                     <thead>
@@ -227,9 +171,13 @@ const Requests = () => {
                                 <td className={getStatusColor(request.ReqStatusDesc)}>
                                     <b>{request.ReqStatusDesc}</b>
                                 </td>
-                                <td>{new Date(request.CompletedDate).toLocaleDateString('en-GB')}</td>
-                                <td>{request.CompletedBy}</td>
-                                <td>{request.Remarks}</td>
+                                <td>
+                                    {request.CompletedDate
+                                        ? new Date(request.CompletedDate).toLocaleDateString("en-GB")
+                                        : "-"}
+                                </td>
+                                <td>{request.CompletedBy || "-"}</td>
+                                <td>{request.Remarks || "-"}</td>
                             </tr>
                         ))}
                     </tbody>
