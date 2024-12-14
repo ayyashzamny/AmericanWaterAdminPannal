@@ -1,116 +1,122 @@
-// src/pages/Dashboard.js
 import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Table } from 'react-bootstrap';
- 
+import { Card, Row, Col } from 'react-bootstrap';
+import axios from 'axios';
+import CountUp from 'react-countup';
+
 const Dashboard = () => {
-  // Mock data for testing
-  const mockRequestsSummary = {
-    Pending: 10,
-    Approved: 25,
-    Rejected: 5,
-  };
- 
-  const mockCustomers = [
-    { CusID: 1, RegedCustomerCode: 'CUST001', RegedBranchCode: 'BR001', RegedMobile: '1234567890', RegedNIC: 'NIC001' },
-    { CusID: 2, RegedCustomerCode: 'CUST002', RegedBranchCode: 'BR002', RegedMobile: '0987654321', RegedNIC: 'NIC002' },
-    { CusID: 3, RegedCustomerCode: 'CUST003', RegedBranchCode: 'BR003', RegedMobile: '1122334455', RegedNIC: 'NIC003' },
-    { CusID: 4, RegedCustomerCode: 'CUST004', RegedBranchCode: 'BR004', RegedMobile: '2233445566', RegedNIC: 'NIC004' },
-    { CusID: 5, RegedCustomerCode: 'CUST005', RegedBranchCode: 'BR005', RegedMobile: '3344556677', RegedNIC: 'NIC005' },
-  ];
- 
-  const mockTotalCustomers = 50;
-  const mockPromotionsCount = 8;
- 
-  const [requestsSummary, setRequestsSummary] = useState({});
-  const [customers, setCustomers] = useState([]);
   const [totalCustomers, setTotalCustomers] = useState(0);
   const [promotionsCount, setPromotionsCount] = useState(0);
- 
+  const [complaintsSummary, setComplaintsSummary] = useState({});
+  const [requestsSummary, setRequestsSummary] = useState({});
+
+  const authToken = localStorage.getItem('authToken');
+
   useEffect(() => {
-    // Simulating fetching data
-    setRequestsSummary(mockRequestsSummary);
-    setCustomers(mockCustomers);
-    setTotalCustomers(mockTotalCustomers);
-    setPromotionsCount(mockPromotionsCount);
+    fetchPromotions();
+    fetchCustomers();
+    fetchComplaints();
+    fetchRequests();
   }, []);
- 
+
+  const axiosConfig = {
+    headers: {
+      Authorization: `Bearer ${authToken}`,
+    },
+  };
+
+  const fetchCustomers = async () => {
+    try {
+      const response = await axios.get('http://localhost:5050/api/customers', axiosConfig);
+      setTotalCustomers(response.data.length);
+    } catch (error) {
+      console.error('Error fetching customers:', error);
+    }
+  };
+
+  const fetchPromotions = async () => {
+    try {
+      const response = await axios.get('http://localhost:5050/api/promotions', axiosConfig);
+      setPromotionsCount(response.data.length);
+    } catch (error) {
+      console.error('Error fetching promotions:', error);
+    }
+  };
+
+  const fetchComplaints = async () => {
+    try {
+      const response = await axios.get('http://localhost:5050/api/complaints', axiosConfig);
+      const summary = {
+        Pending: response.data.filter((c) => c.Status === 'Pending').length,
+        Resolved: response.data.filter((c) => c.Status === 'Resolved').length,
+        'In Progress': response.data.filter((c) => c.Status === 'In Progress').length,
+        Rejected: response.data.filter((c) => c.Status === 'Rejected').length,
+      };
+      setComplaintsSummary(summary);
+    } catch (error) {
+      console.error('Error fetching complaints:', error);
+    }
+  };
+
+  const fetchRequests = async () => {
+    try {
+      const response = await axios.get('http://localhost:5050/api/requests', axiosConfig);
+      const summary = {
+        Recorded: response.data.filter((r) => r.ReqStatusDesc === 'Recorded').length,
+        Completed: response.data.filter((r) => r.ReqStatusDesc === 'Completed').length,
+        Rejected: response.data.filter((r) => r.ReqStatusDesc === 'Rejected').length,
+        'Forwarded to Marketing': response.data.filter((r) => r.ReqStatusDesc === 'Forwarded To Marketing').length,
+        'Forwarded to Operations': response.data.filter((r) => r.ReqStatusDesc === 'Forwarded To Operation').length,
+      };
+      setRequestsSummary(summary);
+    } catch (error) {
+      console.error('Error fetching requests:', error);
+    }
+  };
+
   return (
-    <div className="page">
-      <h1>Dashboard</h1>
-      <p>Welcome to the dashboard.</p>
- 
-      {/* Row 1: Requests Summary */}
-      <Row className="mb-4">
-        <Col>
-          <Card className="text-center">
-            <Card.Body>
-              <Card.Title>Total Requests</Card.Title>
-              <Card.Text>{Object.values(requestsSummary).reduce((a, b) => a + b, 0)}</Card.Text>
-            </Card.Body>
+    <div className="container mt-5">
+      <h3 className="mb-4 text-center">Dashboard</h3>
+
+      {/* Main Row */}
+      <Row>
+        <Col md={6} className="mb-4">
+          <Card className="p-3">
+            <Card.Title>Total Customers</Card.Title>
+            <Card.Text className="display-6">
+              <CountUp end={totalCustomers} duration={2} />
+            </Card.Text>
           </Card>
         </Col>
-        {Object.keys(requestsSummary).map((status) => (
-          <Col key={status}>
-            <Card className="text-center">
-              <Card.Body>
-                <Card.Title>{status}</Card.Title>
-                <Card.Text>{requestsSummary[status]}</Card.Text>
-              </Card.Body>
-            </Card>
-          </Col>
-        ))}
-      </Row>
- 
-      {/* Row 2: Customers and Promotions */}
-      <Row className="mb-4">
-        <Col md={6}>
-          <Card>
-            <Card.Body>
-              <Card.Title>Total Customers</Card.Title>
-              <Card.Text>{totalCustomers}</Card.Text>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col md={6}>
-          <Card>
-            <Card.Body>
-              <Card.Title>Total Promotions</Card.Title>
-              <Card.Text>{promotionsCount}</Card.Text>
-            </Card.Body>
+        <Col md={6} className="mb-4">
+          <Card className="p-3">
+            <Card.Title>Total Promotions</Card.Title>
+            <Card.Text className="display-6">
+              <CountUp end={promotionsCount} duration={2} />
+            </Card.Text>
           </Card>
         </Col>
       </Row>
- 
-      {/* Row 3: Recent Customers */}
-      <Card className="mb-4">
-        <Card.Body>
-          <Card.Title>Last 5 Customers</Card.Title>
-          <Table striped bordered hover>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Customer Code</th>
-                <th>Branch Code</th>
-                <th>Mobile</th>
-                <th>NIC</th>
-              </tr>
-            </thead>
-            <tbody>
-              {customers.map((customer, index) => (
-                <tr key={customer.CusID}>
-                  <td>{index + 1}</td>
-                  <td>{customer.RegedCustomerCode}</td>
-                  <td>{customer.RegedBranchCode}</td>
-                  <td>{customer.RegedMobile}</td>
-                  <td>{customer.RegedNIC}</td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </Card.Body>
-      </Card>
+
+      <Row>
+        <Col md={6} className="mb-4">
+          <Card className="p-3">
+            <Card.Title>Pending Complaints</Card.Title>
+            <Card.Text className="display-6">
+              <CountUp end={complaintsSummary.Pending || 0} duration={2} />
+            </Card.Text>
+          </Card>
+        </Col>
+        <Col md={6} className="mb-4">
+          <Card className="p-3">
+            <Card.Title>New Requests</Card.Title>
+            <Card.Text className="display-6">
+              <CountUp end={requestsSummary.Recorded || 0} duration={2} />
+            </Card.Text>
+          </Card>
+        </Col>
+      </Row>
     </div>
   );
 };
- 
+
 export default Dashboard;

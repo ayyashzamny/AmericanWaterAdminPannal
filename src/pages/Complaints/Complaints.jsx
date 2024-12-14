@@ -18,7 +18,7 @@ const Complaints = () => {
   const [selectedStatus, setSelectedStatus] = useState(""); // Added state for selected status
 
   // Assuming token is stored in localStorage
-  const token = localStorage.getItem('authToken'); // Replace with your actual token storage logic
+  const token = localStorage.getItem('authToken');
 
   // Fetch complaints data
   useEffect(() => {
@@ -113,7 +113,7 @@ const Complaints = () => {
 
   return (
     <div className="page">
-      <h1 className="mb-4">Complaints</h1>
+      <h1>Complaints</h1>
       <p>Manage your Complaints here.</p>
 
       <Row className="mb-4">

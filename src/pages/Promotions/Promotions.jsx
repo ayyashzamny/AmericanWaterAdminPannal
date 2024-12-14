@@ -184,7 +184,8 @@ const Promotions = () => {
 
   return (
     <div className="page">
-      <h2>Promotions Management</h2>
+      <h1>Promotions</h1>
+      <p>Manage your Promotions here.</p>
       <Button variant="primary" onClick={handleShow} className="mb-3">
         Add Promotion
       </Button>

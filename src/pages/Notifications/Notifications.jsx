@@ -145,7 +145,7 @@ const Notifications = () => {
         axiosInstance.delete(`http://localhost:5050/api/notifications/${id}`)
           .then((response) => {
             setNotifications(notifications.filter((notification) => notification.id !== id));
-            Swal.fire({
+            Swal.fire({ // Alert the user
               icon: 'success',
               title: 'Deleted!',
               text: 'The notification has been deleted.',
@@ -153,7 +153,7 @@ const Notifications = () => {
               timer: 1500,
             });
           })
-          .catch((error) => {
+          .catch((error) => { // Handle error
             console.error('Error deleting notification:', error);
             Swal.fire({
               icon: 'error',
@@ -165,7 +165,7 @@ const Notifications = () => {
     });
   };
 
-  const handleSendNotification = () => {
+  const handleSendNotification = () => { // Send notification to a specific user
     const { customerId, notificationId } = sendNotificationData;
 
     if (!customerId || !notificationId) {
@@ -217,7 +217,8 @@ const Notifications = () => {
 
   return (
     <div>
-      <h1>Notifications</h1>
+      <h1 className="mb-4">Notifications</h1>
+      <p >Manage your Notifications here.</p>
       <Button variant="primary" onClick={handleShow} className="me-3">
         Add New Notification
       </Button>

@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Table, Spinner, Card } from 'react-bootstrap';
+import { Table, Spinner, Card, Form } from 'react-bootstrap';
 
 const Customers = () => {
   const [customers, setCustomers] = useState([]);
+  const [filteredCustomers, setFilteredCustomers] = useState([]); // For search results
   const [totalCustomers, setTotalCustomers] = useState(0); // New state to store total customers count
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState(''); // State for search input
 
   // Add your token here or retrieve it from local storage or context
   const token = localStorage.getItem('authToken'); // Replace with your actual token
@@ -21,6 +23,7 @@ const Customers = () => {
       })
       .then((response) => {
         setCustomers(response.data); // Assuming the data is in the response body
+        setFilteredCustomers(response.data); // Initialize filtered data
         setTotalCustomers(response.data.length); // Set total customers count
         setLoading(false);
       })
@@ -30,6 +33,22 @@ const Customers = () => {
         setLoading(false);
       });
   }, [token]); // Use token as dependency to re-fetch data if token changes
+
+  // Handle search input changes
+  const handleSearch = (e) => {
+    const value = e.target.value.toLowerCase();
+    setSearchTerm(value);
+
+    const filtered = customers.filter((customer) => {
+      return (
+        (customer.RegedCustomerCode && customer.RegedCustomerCode.toLowerCase().includes(value)) ||
+        (customer.RegedBranchCode && customer.RegedBranchCode.toLowerCase().includes(value)) ||
+        (customer.RegedMobile && typeof customer.RegedMobile === 'string' && customer.RegedMobile.toLowerCase().includes(value)) ||
+        (customer.RegedNIC && customer.RegedNIC.toLowerCase().includes(value))
+      );
+    });
+    setFilteredCustomers(filtered);
+  };
 
   if (loading) {
     return (
@@ -61,6 +80,16 @@ const Customers = () => {
         </Card.Body>
       </Card>
 
+      {/* Search bar */}
+      <Form className="mb-3">
+        <Form.Control
+          type="text"
+          placeholder="Search by Customer Code, Branch Code, Mobile, or NIC"
+          value={searchTerm}
+          onChange={handleSearch}
+        />
+      </Form>
+
       <Table striped bordered hover>
         <thead>
           <tr>
@@ -72,7 +101,7 @@ const Customers = () => {
           </tr>
         </thead>
         <tbody>
-          {customers.map((customer, index) => (
+          {filteredCustomers.map((customer, index) => (
             <tr key={customer.CusID}>
               <td>{index + 1}</td>
               <td>{customer.RegedCustomerCode}</td>

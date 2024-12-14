@@ -47,6 +47,7 @@ const PromotionModal = ({
             <Form.Control
               type="text"
               name="Title"
+              placeholder="Enter promotion title"
               value={promotionData.Title}
               onChange={handleChange}
             />
@@ -55,8 +56,10 @@ const PromotionModal = ({
           <Form.Group controlId="formDescription" className="mt-3">
             <Form.Label>Description</Form.Label>
             <Form.Control
-              type="text"
+              as="textarea" // Changed to textarea
+              rows={3}      // Set rows to 3
               name="Description"
+              placeholder="Enter promotion description"
               value={promotionData.Description}
               onChange={handleChange}
             />
@@ -68,7 +71,8 @@ const PromotionModal = ({
               type="date"
               name="StartDate"
               value={formatDate(promotionData.StartDate)}
-              onChange={handleStartDateChange} // Use the new handler for start date
+              onChange={handleStartDateChange}
+              placeholder="Select start date"
             />
           </Form.Group>
 
@@ -79,7 +83,8 @@ const PromotionModal = ({
               name="EndDate"
               value={formatDate(promotionData.EndDate)}
               onChange={handleChange}
-              min={formatDate(promotionData.StartDate)} // Ensure min is updated dynamically
+              min={formatDate(promotionData.StartDate)}
+              placeholder="Select end date"
             />
           </Form.Group>
 
@@ -88,10 +93,9 @@ const PromotionModal = ({
             <Form.Control
               type="file"
               name="ImagePath"
-              onChange={handleFileChange} // Handle file input change
+              onChange={handleFileChange}
             />
           </Form.Group>
-
         </Form>
       </Modal.Body>
       <Modal.Footer>
